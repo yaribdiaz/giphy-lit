@@ -1,0 +1,16 @@
+{
+  "name": "litelement",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "web-dev-server --node-resolve --open --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@web/dev-server": "^0.3.1",
+    "lit": "^2.8.0"
+  }
+}

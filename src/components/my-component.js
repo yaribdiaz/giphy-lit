@@ -1,7 +1,9 @@
 import { LitElement, html, css, nothing } from 'lit';
 
+import { TitleColors } from './title-colors';
 import { SearchBar } from './search-bar';
 import { AlertCopied } from './alert-copied';
+import { SearchHistory } from './search-history';
 
 export class MyComponent extends LitElement {
   
@@ -17,10 +19,10 @@ export class MyComponent extends LitElement {
     giphys: { type: Array},
     search: {},
     copied: {type: Boolean},
-    loading: {type: Boolean}
+    loading: {type: Boolean},
+    history: { type: Array },
+    searchFor: { type: String }
   }
-
-  searchFor='';
   
   constructor(){
     super();
@@ -31,10 +33,11 @@ export class MyComponent extends LitElement {
     this.api_url = `http://api.giphy.com/v1/gifs/search?q=${this.search}&api_key=${this.api_key}&limit=20`;
     this.copied = false;
     this.loading = false;
+    this.history = JSON.parse(localStorage.getItem('history')) ?? [];
+    this.searchFor = '';
   }
 
-  getGiphy = async (e) => {
-    if (e)e.preventDefault();
+  getGiphy = async () => {
     console.log('llamando API')
     this.searchFor = this.search;
     try {
@@ -59,6 +62,35 @@ export class MyComponent extends LitElement {
     this.search = event.target.value;
   }
 
+  _handleSetHistory = () => {
+    let arrayHistory = [...this.history];
+    arrayHistory.unshift(this.search);
+    if (arrayHistory.length > 13){
+      arrayHistory.pop();
+    }
+    this.history = arrayHistory;
+    localStorage.setItem('history', JSON.stringify(arrayHistory));
+    console.log(this.history);
+  }
+
+  setHistoryInSearch = (historyItem) => {
+    this.search = historyItem;
+    this.searchFor = historyItem;
+    this.getGiphy();
+  }
+
+  deleteFromHistory = (historyItem) => {
+    this.history = this.history.filter(i => i !== historyItem)
+    localStorage.setItem('history', JSON.stringify(this.history));
+  }
+
+  showMessageCopied = () => {
+    this.copied = true;
+    setTimeout(() => {
+      this.copied = false;
+    }, 2000);
+  }
+
   showGiphys(img){
     return html`
       <div class="gif-card">
@@ -77,23 +109,18 @@ export class MyComponent extends LitElement {
     `
   }
 
-  showMessageCopied = () => {
-    this.copied = true;
-    setTimeout(() => {
-      this.copied = false;
-    }, 2000);
-  }
 
   render() {
     
     return html`
-      <h1 class="title"> GIPHY</h1>
-      <search-bar .getGiphy=${this.getGiphy.bind(this)} .search=${this.search} ._handleSetSearch=${this._handleSetSearch.bind(this)}></search-bar>
+      <title-colors></title-colors>
+      <search-bar ._handleSetHistory=${this._handleSetHistory} .getGiphy=${this.getGiphy} .search=${this.search} ._handleSetSearch=${this._handleSetSearch.bind(this)}></search-bar>
       <div class="searching-for">
-        ${ this.giphys.length !==0 ? html`<p>Resultados para <span>${this.searchFor}</span></p>` : nothing}
+        ${ this.giphys.length !==0 ? html`<p>Resultados para <span>${this.searchFor}</span></p>` : nothing }
       </div>
-
+      <search-history .history=${this.history} .setHistoryInSearch=${this.setHistoryInSearch} .deleteFromHistory=${this.deleteFromHistory}></search-history>
       <div class="gif-container">
+        
         ${
           !this.loading
           ?(
@@ -101,7 +128,7 @@ export class MyComponent extends LitElement {
               ${
                 this.giphys.length !== 0
                 ? this.giphys.map((gif) => this.showGiphys(gif))
-                : html`<h3 class="no-results">No hay resultados aún</h3>`
+                : html`<h3 class="no-results">No hay resultados para ${this.searchFor}</h3>`
               }
             </div>`
           ) 
@@ -126,12 +153,6 @@ export class MyComponent extends LitElement {
       .searching-for span{
         font-weight: 700;
       }
-
-      .title{
-        font-size: 2.8rem;
-        font-weight: 700;
-        text-align: center;
-      }
       .no-results{
         text-align: center;
         margin-top: 2rem;
@@ -139,12 +160,14 @@ export class MyComponent extends LitElement {
       .gif-container{
         display: flex;
         justify-content: center;
+        display: relative;
       }
       .grid-container{
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         grid-gap: 20px;
         margin-top: 2rem;
+        justify-content: center;
       }
       .gif-card{
         display: flex;
@@ -173,7 +196,7 @@ export class MyComponent extends LitElement {
         padding: 10px;
         width: 20px;
         height: 20px;
-        background-color: #9ca3af;
+        background-color: #9ca3afab;
         border-radius: 100%;
         cursor: pointer;
         transition-property: background-color;

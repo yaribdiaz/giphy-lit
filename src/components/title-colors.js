@@ -23,7 +23,6 @@ export class TitleColors extends LitElement {
     let currentLetter = this.headerArray[this.indice]
     this.indice++;
     this.letter = currentLetter;
-
     // Si el índice llega al final del arreglo, se detiene el loop
     if (this.indice == this.headerArray.length) {
       this.indice = 0

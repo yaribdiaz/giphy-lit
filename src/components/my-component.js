@@ -4,9 +4,11 @@ import { TitleColors } from './title-colors';
 import { SearchBar } from './search-bar';
 import { AlertCopied } from './alert-copied';
 import { SearchHistory } from './search-history';
+import { ExperimentComponent } from './experiment-component';
+import { ModalComponent } from './modal-component';
 
 export class MyComponent extends LitElement {
-  
+
   connectedCallback(){
     super.connectedCallback();
     this.getGiphy();
@@ -23,7 +25,7 @@ export class MyComponent extends LitElement {
     history: { type: Array },
     searchFor: { type: String }
   }
-  
+
   constructor(){
     super();
     this.message = false;
@@ -100,9 +102,10 @@ export class MyComponent extends LitElement {
           </div>
         </div>
         <img
-          src="${img?.images?.downsized_medium['url']}" 
+          src="${img?.images?.downsized_medium['url']}"
           class="gif-image"
           alt="${img.title}"
+          loading="lazy"
         />
         <p>${img.title}</p>
       </div>
@@ -111,7 +114,6 @@ export class MyComponent extends LitElement {
 
 
   render() {
-    
     return html`
       <title-colors></title-colors>
       <search-bar ._handleSetHistory=${this._handleSetHistory} .getGiphy=${this.getGiphy} .search=${this.search} ._handleSetSearch=${this._handleSetSearch.bind(this)}></search-bar>
@@ -120,7 +122,7 @@ export class MyComponent extends LitElement {
       </div>
       <search-history .history=${this.history} .setHistoryInSearch=${this.setHistoryInSearch} .deleteFromHistory=${this.deleteFromHistory}></search-history>
       <div class="gif-container">
-        
+
         ${
           !this.loading
           ?(
@@ -131,14 +133,13 @@ export class MyComponent extends LitElement {
                 : html`<h3 class="no-results">No hay resultados para ${this.searchFor}</h3>`
               }
             </div>`
-          ) 
+          )
           : (
             html`<p>Cargando...</p>`
           )
         }
 
       </div>
-
       <alert-copied .copied=${this.copied}></alert-copied>
     `;
   }
@@ -206,7 +207,7 @@ export class MyComponent extends LitElement {
         background-color: white;
       }
       /* medium */
-      @media (min-width: 768px) { 
+      @media (min-width: 768px) {
         .grid-container{
           grid-template-columns: repeat(3, 1fr);
         }
